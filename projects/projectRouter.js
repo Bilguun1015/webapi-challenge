@@ -24,7 +24,7 @@ router.post('/', validateProject, (req,res) => {
 });
 
 router.put('/:projectID',validateProjectId, validateProject, (req, res) => {
-    const projectID = req.project.projectID;
+    const projectID = req.params.projectID;
     const changes = req.body;
     Projects.update(projectID, changes)
         .then(project => {
@@ -32,12 +32,12 @@ router.put('/:projectID',validateProjectId, validateProject, (req, res) => {
         })
         .catch(error => {
             console.log(error)
-            res.status(500).json.apply({error: "error updating project"})
+            res.status(500).json({error: "error updating project"})
         })
 });
 
 router.delete('/:projectID', validateProjectId, (req, res) => {
-    const projectID = req.project.projectID;
+    const projectID = req.params.projectID;
     Projects.remove(projectID)
         .then(project => {
             res.status(200).json({message: "Project successfully deleted"})
@@ -51,7 +51,7 @@ router.delete('/:projectID', validateProjectId, (req, res) => {
 //custom middleware
 
 function validateProjectId(req, res, next) {
-    const { projectID } = req.params;
+    const projectID = req.params.projectID;
     Projects.get(projectID).then( project => {
         if(project){
             req.project = project;

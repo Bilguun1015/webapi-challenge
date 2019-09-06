@@ -4,7 +4,7 @@ const Projects = require('../data/helpers/projectModel.js');
 const router = express.Router({mergeParams: true});
 
 router.get('/', validateProjectId, (req, res) => {
-    const projectID = req.params.id;
+    const projectID = req.params.projectID;
     Projects.getProjectActions(projectID)
         .then(actions => {
             res.status(200).json(actions)

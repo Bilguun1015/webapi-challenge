@@ -1,24 +1,15 @@
 const express = require('express');
 const Projects = require('../data/helpers/projectModel.js');
-
+const actionRouter = require('../actions/actionRouter.js');
 const router = express.Router();
 
+router.use('/:projectID/actions', actionRouter);
 
-router.get('/:id', validateProjectId, (req, res) => {
+
+router.get('/:projectID', validateProjectId, (req, res) => {
     res.status(200).json(req.project)
 });
 
-router.get('/:id/actions', validateProjectId, (req, res) => {
-    const projectID = req.params.id;
-    Projects.getProjectActions(projectID)
-        .then(actions => {
-            res.status(200).json(actions)
-        })
-        .catch(error => {
-            console.log(error)
-            res.status(500).json({error: "error catching actions"})
-        })
-});
 
 router.post('/', validateProject, (req,res) => {
     const project = req.body;
@@ -32,8 +23,8 @@ router.post('/', validateProject, (req,res) => {
         })
 });
 
-router.put('/:id',validateProjectId, validateProject, (req, res) => {
-    const projectID = req.project.id;
+router.put('/:projectID',validateProjectId, validateProject, (req, res) => {
+    const projectID = req.project.projectID;
     const changes = req.body;
     Projects.update(projectID, changes)
         .then(project => {
@@ -45,8 +36,8 @@ router.put('/:id',validateProjectId, validateProject, (req, res) => {
         })
 });
 
-router.delete('/:id', validateProjectId, (req, res) => {
-    const projectID = req.project.id;
+router.delete('/:projectID', validateProjectId, (req, res) => {
+    const projectID = req.project.projectID;
     Projects.remove(projectID)
         .then(project => {
             res.status(200).json({message: "Project successfully deleted"})
@@ -60,8 +51,8 @@ router.delete('/:id', validateProjectId, (req, res) => {
 //custom middleware
 
 function validateProjectId(req, res, next) {
-    const { id } = req.params;
-    Projects.get(id).then( project => {
+    const { projectID } = req.params;
+    Projects.get(projectID).then( project => {
         if(project){
             req.project = project;
             next();
@@ -90,8 +81,15 @@ function validateProject(req, res, next) {
     if(typeof name !== 'string'){
         return res.status(400).json({error: "name must be string"});
     }
+    if(typeof description !== 'string'){
+        return res.status(400).json({error: "description must be string"});
+    }
+    if(description.length > 128){
+        return res.status(400).json({error: "description must be less than 128 characters"});
+    }
     next();
 };
+
 
 
 module.exports = router; 
